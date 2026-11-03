@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse
 from django.urls import include, path
 from django.views.decorators.csrf import csrf_exempt
@@ -17,6 +17,13 @@ def login_view(request):
     return HttpResponse("welcome")
 
 
+@csrf_exempt
+@require_POST
+def logout_view(request):
+    logout(request)
+    return HttpResponse("bye")
+
+
 def bound_status_view(request):
     return HttpResponse(str(request.dbsc_bound))
 
@@ -31,5 +38,6 @@ urlpatterns = [
     path("bound-status/", bound_status_view, name="bound-status"),
     path("sensitive/", sensitive_view, name="sensitive"),
     path("login/", login_view, name="login"),
+    path("logout/", logout_view, name="logout"),
     path("dbsc/", include("django_dbsc.urls")),
 ]

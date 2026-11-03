@@ -7,8 +7,10 @@ class DjangoDbscConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
 
     def ready(self) -> None:
-        from django.contrib.auth.signals import user_logged_in
+        from django.contrib.auth.signals import user_logged_in, user_logged_out
 
+        from django_dbsc.services.logout import revoke_on_logout
         from django_dbsc.services.registration import request_registration_offer
 
         user_logged_in.connect(request_registration_offer, dispatch_uid="django_dbsc.request_registration_offer")
+        user_logged_out.connect(revoke_on_logout, dispatch_uid="django_dbsc.revoke_on_logout")

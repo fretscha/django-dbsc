@@ -6,6 +6,7 @@ from django_dbsc import conf
 from django_dbsc.constants import BOUND_COOKIE_NAME, SESSION_DBSC_ID
 from django_dbsc.services.challenge import ChallengeStore
 from django_dbsc.services.cookie import BoundCookieCodec
+from django_dbsc.services.logout import clear_bound_cookie
 from django_dbsc.services.policy import BindingPolicy, Verdict, load_policy
 from django_dbsc.services.registration import offer_registration
 
@@ -44,6 +45,7 @@ class DeviceBoundSessionMiddleware:
             return self._reject_unbound(request)
         response = self.get_response(request)
         offer_registration(request, response, self.challenges)
+        clear_bound_cookie(request, response)
         return response
 
     def _reject(self, request, dbsc_id: str) -> HttpResponse:
