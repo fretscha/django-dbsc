@@ -13,6 +13,8 @@ First usable release. It implements the server side of the
 
 ### Added
 
+- Supported: Python 3.12–3.14, Django 5.2, 6.0 and 6.1 (all combinations tested in CI)
+
 - `DeviceBoundSessionMiddleware`:
   - offers registration after every `login()`
   - enforces the short-lived bound cookie on bound sessions
@@ -32,7 +34,8 @@ First usable release. It implements the server side of the
 
 ### Known limitations
 
-- No built-in rate limiting on the DBSC endpoints. Use your reverse proxy (see the deployment checklist).
+- No built-in rate limiting on the DBSC endpoints. The work per request is bounded (see the security model). An
+  optional per-session limit at the reverse proxy is described in the deployment checklist.
 - The first refresh after registration takes one extra `403` round trip in Chrome.
 - Site-scoped sessions (`include_site`) and federated sessions are not supported.
 

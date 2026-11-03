@@ -75,7 +75,7 @@ The browser acts on status codes, so they are chosen deliberately:
 | Malware running on the victim's device, using the browser itself | ❌ out of scope: the key is used through the legitimate browser |
 | Sessions in browsers without DBSC (Firefox, Safari today) | ❌ unprotected, unless `REQUIRE_BINDING` keeps those users out |
 | Theft in the first moments after login, before registration completes | ⚠️ brief window; see below |
-| Flooding `/dbsc/refresh` to fill the cache with challenges | ⚠️ no built-in rate limit yet; limit at the reverse proxy ([checklist](guide.md#deployment-checklist)) |
+| Flooding `/dbsc/refresh` to fill the cache | ✅ bounded: requests without a logged-in session and an active binding are refused before any cache write, and a binding holds at most 3 challenges. An optional per-session proxy limit is in the [checklist](guide.md#deployment-checklist). |
 
 **The registration window.** Between the login response and the browser's background registration (usually
 milliseconds), the session isn't bound yet. An attacker who steals `sessionid` in exactly that window could try to

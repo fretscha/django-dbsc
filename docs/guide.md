@@ -189,19 +189,32 @@ The first reason is kept. A later revocation never overwrites it.
       DBSC endpoints.
 - [ ] **Your reverse proxy forwards** the `Secure-Session-*`, `Sec-Secure-Session-Id` and `Sec-Fetch-Site`
       request headers, and doesn't strip `Secure-Session-*` response headers.
-- [ ] **Rate-limit the DBSC endpoints at your reverse proxy.** django-dbsc has no built-in rate limiting yet. Every
-      refresh without a valid proof writes a challenge to the cache. Answer limited requests with `429`: the browser
-      keeps its session on `429` (unlike other `4xx`), and backs off.
+- [ ] **Optional: rate-limit the DBSC endpoints per session.** django-dbsc has no built-in rate limit, but the work
+      per request is bounded. Only a request from a logged-in session with an active binding gets past the session
+      lookup. It then costs one DB read and one signature check, and a binding never holds more than 3 challenges.
+      Everything else is refused (`400`/`401`) without writing anything. A proxy limit caps a client that misbehaves
+      with its own session.
+
+      **Key the limit on the session cookie, never on the client IP.** Many users can share one IP (corporate NAT,
+      mobile carriers). A per-IP limit throttles their refreshes together, their bound cookies expire, and they get
+      `401`s. A real browser needs one registration per login, then about 2 requests per refresh, every
+      `BOUND_COOKIE_MAX_AGE` minus 2 minutes. Answer with `429`: on `429` (unlike other `4xx`) the browser keeps its
+      session and backs off.
 
       ```nginx
-      limit_req_zone $binary_remote_addr zone=dbsc:10m rate=30r/m;
+      # Keyed on Django's session cookie (SESSION_COOKIE_NAME, default "sessionid").
+      # Requests without that cookie have an empty key, which nginx doesn't count. Django refuses them anyway.
+      limit_req_zone $cookie_sessionid zone=dbsc:10m rate=10r/m;
 
       location /dbsc/ {
-          limit_req zone=dbsc burst=10 nodelay;
+          limit_req zone=dbsc burst=20 nodelay;
           limit_req_status 429;
           proxy_pass http://django;
       }
       ```
+
+      The cookie value is chosen by the client, so this limits a misbehaving session, not an attacker who rotates
+      cookie values. Those requests are refused without side effects either way.
 
 ## Local development over HTTPS
 
