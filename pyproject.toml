@@ -3,6 +3,8 @@ name = "django-dbsc"
 version = "0.0.1"
 description = "Device Bound Session Credentials (W3C DBSC) for Django: bind session cookies to a device key."
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
     { name = "Frederic Tschannen", email = "fretscha@umx.net" }
 ]
