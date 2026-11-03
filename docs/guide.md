@@ -189,6 +189,19 @@ The first reason is kept. A later revocation never overwrites it.
       DBSC endpoints.
 - [ ] **Your reverse proxy forwards** the `Secure-Session-*`, `Sec-Secure-Session-Id` and `Sec-Fetch-Site`
       request headers, and doesn't strip `Secure-Session-*` response headers.
+- [ ] **Rate-limit the DBSC endpoints at your reverse proxy.** django-dbsc has no built-in rate limiting yet. Every
+      refresh without a valid proof writes a challenge to the cache. Answer limited requests with `429`: the browser
+      keeps its session on `429` (unlike other `4xx`), and backs off.
+
+      ```nginx
+      limit_req_zone $binary_remote_addr zone=dbsc:10m rate=30r/m;
+
+      location /dbsc/ {
+          limit_req zone=dbsc burst=10 nodelay;
+          limit_req_status 429;
+          proxy_pass http://django;
+      }
+      ```
 
 ## Local development over HTTPS
 

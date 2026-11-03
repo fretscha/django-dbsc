@@ -1,6 +1,6 @@
 [project]
 name = "django-dbsc"
-version = "0.0.1"
+version = "0.1.0"
 description = "Device Bound Session Credentials (W3C DBSC) for Django: bind session cookies to a device key."
 readme = "README.md"
 license = "MIT"
@@ -16,16 +16,23 @@ dependencies = [
 ]
 keywords = ["django", "dbsc", "device-bound-session-credentials", "session", "security", "cookie-theft"]
 classifiers = [
-    "Development Status :: 1 - Planning",
+    "Development Status :: 3 - Alpha",
     "Framework :: Django",
+    "Framework :: Django :: 5.2",
+    "Framework :: Django :: 6.1",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Internet :: WWW/HTTP :: Session",
     "Topic :: Security",
 ]
 
 [project.urls]
+Homepage = "https://github.com/fretscha/django-dbsc"
+Documentation = "https://github.com/fretscha/django-dbsc/tree/main/docs"
+Changelog = "https://github.com/fretscha/django-dbsc/blob/main/CHANGELOG.md"
+Issues = "https://github.com/fretscha/django-dbsc/issues"
 Specification = "https://w3c.github.io/webappsec-dbsc/"
 
 [build-system]

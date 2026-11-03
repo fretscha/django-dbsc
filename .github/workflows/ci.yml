@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked
+      - run: uv run ruff format --check .
+      - run: uv run ruff check .
+      - run: uv run ty check src
+      - name: No missing migrations
+        run: uv run python -m django makemigrations --check --dry-run django_dbsc
+        env:
+          DJANGO_SETTINGS_MODULE: tests.settings
+          PYTHONPATH: .
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.12", "3.13"]
+        django: ["5.2", "6.1"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: pytest (Python ${{ matrix.python }}, Django ${{ matrix.django }})
+        run: >
+          uv run --isolated --python ${{ matrix.python }}
+          --with "django~=${{ matrix.django }}.0" --with pytest --with pytest-django
+          pytest -q

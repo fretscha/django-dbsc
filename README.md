@@ -15,8 +15,9 @@ With DBSC:     stolen sessionid  ──▶  401 (no device key, no valid bound c
 - **Your choice of strictness:** protect everyone opportunistically, guard sensitive views, or *require* binding for
   staff.
 
-> **Status: pre-alpha.** The API may change before 0.1.0. It has been verified end to end in Chrome 156. See
-> [docs/real-browser-testing.md](docs/real-browser-testing.md).
+> **Status: alpha (0.1.0).** It has been verified end to end in Chrome 156 (see
+> [docs/real-browser-testing.md](docs/real-browser-testing.md)). The API may still change before 1.0. See the
+> [CHANGELOG](CHANGELOG.md) for known limitations.
 
 ## Requirements
 
@@ -28,9 +29,10 @@ With DBSC:     stolen sessionid  ──▶  401 (no device key, no valid bound c
 ## Quickstart
 
 ```bash
-# Until 0.1.0 is published, install from a source checkout. 0.0.1 on PyPI is only a name placeholder.
-uv add /path/to/django-dbsc        # or: pip install /path/to/django-dbsc
+uv add "django-dbsc>=0.1.0"        # or: pip install "django-dbsc>=0.1.0"
 ```
+
+(0.0.1 on PyPI is an empty name placeholder. Make sure you get 0.1.0 or later.)
 
 ```python
 # settings.py
