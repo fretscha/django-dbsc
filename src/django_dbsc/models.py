@@ -19,6 +19,8 @@ class DeviceBoundSession(models.Model):
     last_refreshed_at = models.DateTimeField(null=True, blank=True)
     # WHY soft revoke: keeps an audit trail of which device keys were cut off and when.
     revoked_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    # Short machine-readable cause, e.g. "logout" or "missing_bound_cookie". The first cause wins.
+    revoked_reason = models.CharField(max_length=64, blank=True, default="")
 
     # WHY explicit: type checkers without a Django plugin (ty) can't see the implicit default manager.
     objects: ClassVar[models.Manager] = models.Manager()

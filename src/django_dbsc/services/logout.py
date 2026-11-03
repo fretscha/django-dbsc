@@ -25,7 +25,7 @@ def revoke_on_logout(sender, request, user, **kwargs) -> None:
         return
     setattr(request, _CLEAR_FLAG, True)
     try:
-        get_repository().revoke(sid)
+        get_repository().revoke(sid, reason="logout")
     except DatabaseError:
         # WHY swallow: logout must always succeed. The session flush still kills this session, and the stale
         # binding can't be reached without it.

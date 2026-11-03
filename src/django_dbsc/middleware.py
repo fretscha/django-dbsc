@@ -1,14 +1,17 @@
 import logging
 
+from django.db import DatabaseError
 from django.http import HttpResponse, HttpResponseForbidden
 
 from django_dbsc import conf
-from django_dbsc.constants import BOUND_COOKIE_NAME, SESSION_DBSC_ID
+from django_dbsc.constants import BOUND_COOKIE_NAME, SESSION_DBSC_ID, SKIPPED_HEADER
+from django_dbsc.repositories import DeviceBoundSessionRepository
 from django_dbsc.services.challenge import ChallengeStore
 from django_dbsc.services.cookie import BoundCookieCodec
 from django_dbsc.services.logout import clear_bound_cookie
 from django_dbsc.services.policy import BindingPolicy, Verdict, load_policy
 from django_dbsc.services.registration import offer_registration
+from django_dbsc.services.skipped import names_session
 
 logger = logging.getLogger("django_dbsc")
 
@@ -25,10 +28,12 @@ class DeviceBoundSessionMiddleware:
         cookie_codec: BoundCookieCodec | None = None,
         challenges: ChallengeStore | None = None,
         policy: BindingPolicy | None = None,
+        repo: DeviceBoundSessionRepository | None = None,
     ):
         self.get_response = get_response
         self.codec = cookie_codec or BoundCookieCodec(max_age=conf.get("BOUND_COOKIE_MAX_AGE"))
         self.challenges = challenges or ChallengeStore()
+        self.repo = repo or DeviceBoundSessionRepository()
         self.exempt_prefixes = tuple(conf.get("EXEMPT_PATH_PREFIXES"))
         # Loaded once at startup, so a bad REQUIRE_BINDING path fails at boot rather than on a request.
         self.policy = policy or load_policy(conf.get("REQUIRE_BINDING"), conf.get("BINDING_GRACE_SECONDS"))
@@ -49,13 +54,21 @@ class DeviceBoundSessionMiddleware:
         return response
 
     def _reject(self, request, dbsc_id: str) -> HttpResponse:
-        # WHY we never honour Secure-Session-Skipped: it is a client header, so a cookie thief can send it too.
+        skipped = request.headers.get(SKIPPED_HEADER)
+        if names_session(skipped, dbsc_id):
+            # WHY refuse but keep the session: real browsers skip refreshes (signing quota, unreachable endpoint)
+            # and say so. The header is forgeable, so it never grants access. A thief still gets a 401 and has no
+            # key to refresh with, while the real browser recovers on its next successful refresh.
+            logger.info("[DBSC] refresh skipped by browser, refusing without ending session dbsc_id=%s", dbsc_id)
+            return HttpResponse("Device-bound session could not be verified.", status=401)
+
         logger.warning(
             "[DBSC] bound cookie missing/invalid, ending session dbsc_id=%s path=%s skipped=%r",
             dbsc_id,
             request.path,
-            request.headers.get("Secure-Session-Skipped"),
+            skipped,
         )
+        self._revoke(dbsc_id, reason="missing_bound_cookie")
         request.session.flush()
         response = HttpResponse("Device-bound session could not be verified.", status=401)
         response.delete_cookie(BOUND_COOKIE_NAME)
@@ -69,3 +82,11 @@ class DeviceBoundSessionMiddleware:
         )
         request.session.flush()
         return HttpResponseForbidden("This account requires a browser that supports device-bound sessions.")
+
+    def _revoke(self, dbsc_id: str, reason: str) -> None:
+        # WHY revoke as well as flush: otherwise the binding lingers as an "active" record for a dead session.
+        try:
+            self.repo.revoke(dbsc_id, reason=reason)
+        except DatabaseError:
+            # The 401 and the flush still protect the session, so a DB hiccup must not turn this into a 500.
+            logger.exception("[DBSC] could not revoke binding dbsc_id=%s reason=%s", dbsc_id, reason)

@@ -1,6 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
 
+from django_dbsc.models import DeviceBoundSession
 from django_dbsc.repositories import DeviceBoundSessionRepository
 from tests.support import DeviceKey
 
@@ -91,3 +92,29 @@ def test_rejects_private_key_material(repo, user):
 
     with pytest.raises(ValueError, match="private"):
         repo.create(user=user, public_jwk=leaked, alg="ES256")
+
+
+def test_revoke_records_reason(repo, user, device):
+    created = repo.create(user=user, public_jwk=device.public_jwk, alg="ES256")
+
+    repo.revoke(created.session_identifier, reason="logout")
+
+    assert DeviceBoundSession.objects.get(pk=created.pk).revoked_reason == "logout"
+
+
+def test_revoke_all_records_reason(repo, user, device):
+    created = repo.create(user=user, public_jwk=device.public_jwk, alg="ES256")
+
+    repo.revoke_all_for_user(user, reason="password_changed")
+
+    assert DeviceBoundSession.objects.get(pk=created.pk).revoked_reason == "password_changed"
+
+
+def test_second_revoke_keeps_the_first_reason(repo, user, device):
+    # The first reason is the true cause. A later cleanup must not overwrite the audit trail.
+    created = repo.create(user=user, public_jwk=device.public_jwk, alg="ES256")
+    repo.revoke(created.session_identifier, reason="missing_bound_cookie")
+
+    repo.revoke(created.session_identifier, reason="logout")
+
+    assert DeviceBoundSession.objects.get(pk=created.pk).revoked_reason == "missing_bound_cookie"

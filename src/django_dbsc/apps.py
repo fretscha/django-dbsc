@@ -8,9 +8,12 @@ class DjangoDbscConfig(AppConfig):
 
     def ready(self) -> None:
         from django.contrib.auth.signals import user_logged_in, user_logged_out
+        from django.core import checks
 
+        from django_dbsc.checks import check_bound_cookie_max_age
         from django_dbsc.services.logout import revoke_on_logout
         from django_dbsc.services.registration import request_registration_offer
 
         user_logged_in.connect(request_registration_offer, dispatch_uid="django_dbsc.request_registration_offer")
         user_logged_out.connect(revoke_on_logout, dispatch_uid="django_dbsc.revoke_on_logout")
+        checks.register(check_bound_cookie_max_age)

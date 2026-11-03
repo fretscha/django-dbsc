@@ -77,7 +77,7 @@ def test_revocation_failure_never_blocks_logout(client, alice, monkeypatch, capl
     sid, _ = register_browser(client, DeviceKey())
 
     class BrokenRepo(DeviceBoundSessionRepository):
-        def revoke(self, session_identifier):
+        def revoke(self, session_identifier, reason=""):
             raise DatabaseError("connection lost")
 
     monkeypatch.setattr(logout_service, "get_repository", BrokenRepo)

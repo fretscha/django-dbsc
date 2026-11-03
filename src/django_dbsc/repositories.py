@@ -30,12 +30,15 @@ class DeviceBoundSessionRepository:
         session.last_refreshed_at = timezone.now()
         DeviceBoundSession.objects.filter(pk=session.pk).update(last_refreshed_at=session.last_refreshed_at)
 
-    def revoke(self, session_identifier: str) -> bool:
-        return self._revoke(session_identifier=session_identifier) > 0
+    def revoke(self, session_identifier: str, reason: str = "") -> bool:
+        return self._revoke(reason, session_identifier=session_identifier) > 0
 
-    def revoke_all_for_user(self, user) -> int:
-        return self._revoke(user=user)
+    def revoke_all_for_user(self, user, reason: str = "") -> int:
+        return self._revoke(reason, user=user)
 
-    def _revoke(self, **filters) -> int:
-        # WHY a single UPDATE: it's atomic, and the revoked_at filter makes repeat calls report 0.
-        return DeviceBoundSession.objects.filter(revoked_at__isnull=True, **filters).update(revoked_at=timezone.now())
+    def _revoke(self, reason: str, **filters) -> int:
+        # WHY a single UPDATE: it's atomic, and the revoked_at filter makes repeat calls report 0 and keeps the
+        # first reason intact.
+        return DeviceBoundSession.objects.filter(revoked_at__isnull=True, **filters).update(
+            revoked_at=timezone.now(), revoked_reason=reason
+        )

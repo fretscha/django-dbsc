@@ -28,14 +28,17 @@ localhost.
    2 minutes left, and allows only about 2 signings per 3–5 minutes (`SigningQuotaExceeded`). With a 20-second
    cookie, Chrome skipped refreshes and sent `Secure-Session-Skipped: quota_exceeded`. The middleware then
    logged out a legitimate user. Keep `BOUND_COOKIE_MAX_AGE` ≥ 300 s (the default 600 s produced no proactive
-   refreshes at all). → Add a Django system check.
+   refreshes at all). **Fixed:** system check `django_dbsc.W001` warns below 300 s.
 3. **`Secure-Session-Skipped` from a real browser causes logouts.** It is still forgeable, so it must never
    grant access. But it could *soften* the consequence: answer 401 *without* flushing the session when the
    header is present, and flush only when it's absent. A thief gains nothing either way (still 401, no key), and
-   a legitimate browser over its signing quota recovers on the next successful refresh.
+   a legitimate browser over its signing quota recovers on the next successful refresh. **Fixed:** the
+   header now softens a rejection only if its `session_identifier` (an sf-string) names *this* session. A
+   missing, malformed or foreign header still flushes the session and revokes the binding.
 4. **A middleware rejection leaves the binding active, and Chrome's DBSC session alive.** The flushed session's
    `DeviceBoundSession` row stays unrevoked. Chrome keeps the session until a refresh is answered with 401.
-   → Revoke on rejection, and record a reason.
+   **Fixed:** strict rejections revoke with `revoked_reason="missing_bound_cookie"`, and logout records
+   `"logout"`. The first reason wins, and a DB failure during revocation still answers 401.
 5. **One refresh used a challenge the server no longer knew** and needed the 403 retry. It recovered
    transparently, but the cause (stale cached challenge vs. ordering of the two proactive refreshes) isn't
    understood yet.

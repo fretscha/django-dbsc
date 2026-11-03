@@ -3,6 +3,9 @@ import pytest
 from django_dbsc.middleware import BOUND_COOKIE_NAME, SESSION_DBSC_ID
 from django_dbsc.services.cookie import BoundCookieCodec
 
+# Rejecting a bound session revokes its binding, so these tests touch the DB.
+pytestmark = pytest.mark.django_db
+
 
 @pytest.fixture
 def bound_client(client):
