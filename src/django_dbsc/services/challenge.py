@@ -8,7 +8,15 @@ import time
 
 from django.core.cache import cache as default_cache
 
+from django_dbsc import conf
+
 KEY_PREFIX = "django_dbsc:challenges:"
+
+# The browser redeems a registration challenge within milliseconds of the login response.
+REGISTRATION_CHALLENGE_TTL = 120
+# WHY margin over the cookie lifetime: Chrome caches the challenge from our last response and signs it at the next
+# refresh, ~BOUND_COOKIE_MAX_AGE later. A shorter TTL turns every real refresh into a 403 retry round trip.
+REFRESH_CHALLENGE_TTL_MARGIN = 60
 
 
 def registration_scope(session_key: str) -> str:
@@ -18,6 +26,15 @@ def registration_scope(session_key: str) -> str:
 
 def refresh_scope(session_identifier: str) -> str:
     return f"refresh:{session_identifier}"
+
+
+def registration_challenges() -> "ChallengeStore":
+    return ChallengeStore(ttl=REGISTRATION_CHALLENGE_TTL)
+
+
+def refresh_challenges() -> "ChallengeStore":
+    ttl = conf.get("REFRESH_CHALLENGE_TTL") or conf.get("BOUND_COOKIE_MAX_AGE") + REFRESH_CHALLENGE_TTL_MARGIN
+    return ChallengeStore(ttl=ttl)
 
 
 class ChallengeStore:

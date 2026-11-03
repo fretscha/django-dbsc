@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django_dbsc import conf
 from django_dbsc.constants import BOUND_COOKIE_NAME, SESSION_DBSC_ID, SKIPPED_HEADER
 from django_dbsc.repositories import DeviceBoundSessionRepository
-from django_dbsc.services.challenge import ChallengeStore
+from django_dbsc.services.challenge import ChallengeStore, registration_challenges
 from django_dbsc.services.cookie import BoundCookieCodec
 from django_dbsc.services.logout import clear_bound_cookie
 from django_dbsc.services.policy import BindingPolicy, Verdict, load_policy
@@ -32,7 +32,7 @@ class DeviceBoundSessionMiddleware:
     ):
         self.get_response = get_response
         self.codec = cookie_codec or BoundCookieCodec(max_age=conf.get("BOUND_COOKIE_MAX_AGE"))
-        self.challenges = challenges or ChallengeStore()
+        self.challenges = challenges or registration_challenges()
         self.repo = repo or DeviceBoundSessionRepository()
         self.exempt_prefixes = tuple(conf.get("EXEMPT_PATH_PREFIXES"))
         # Loaded once at startup, so a bad REQUIRE_BINDING path fails at boot rather than on a request.

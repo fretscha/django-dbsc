@@ -39,9 +39,14 @@ localhost.
    `DeviceBoundSession` row stays unrevoked. Chrome keeps the session until a refresh is answered with 401.
    **Fixed:** strict rejections revoke with `revoked_reason="missing_bound_cookie"`, and logout records
    `"logout"`. The first reason wins, and a DB failure during revocation still answers 401.
-5. **One refresh used a challenge the server no longer knew** and needed the 403 retry. It recovered
-   transparently, but the cause (stale cached challenge vs. ordering of the two proactive refreshes) isn't
-   understood yet.
+5. **Refreshes needed a 403 retry because our challenges expired too early.** Chrome caches the challenge from our
+   last response and signs it at the next refresh, about `BOUND_COOKIE_MAX_AGE - 120 s` later. The challenge TTL was
+   120 s. **Fixed:** refresh challenges live `BOUND_COOKIE_MAX_AGE + 60` s (setting `REFRESH_CHALLENGE_TTL`), and
+   registration challenges stay at 120 s. Verified in Chrome: the proactive refresh is now a single 200 using the
+   challenge from the previous refresh (`challengeResult: Success`). **Still open:** the *first* refresh after
+   registration still takes one 403 retry. Chrome appears not to use the challenge sent on the register response,
+   probably because the session it names doesn't exist on Chrome's side yet. The DevTools event stream didn't show
+   registrations reliably enough to confirm this. The cost is one extra round trip per session.
 6. With the `enable-standard-device-bound-session-credentials-audience` flag, Chrome adds an `aud` claim. We
    ignore `aud` today, which is fine, but checking it against our origin would be a cheap hardening step.
 

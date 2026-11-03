@@ -13,7 +13,7 @@ from typing import cast
 
 from django_dbsc.constants import SESSION_DBSC_ID, SESSION_ID_HEADER
 from django_dbsc.repositories import DeviceBoundSessionRepository
-from django_dbsc.services.challenge import ChallengeStore, refresh_scope
+from django_dbsc.services.challenge import ChallengeStore, refresh_challenges, refresh_scope
 from django_dbsc.services.proof import ProofError, UnknownChallengeError, verify_refresh_proof
 
 
@@ -43,7 +43,7 @@ class Refreshed:
 class RefreshService:
     def __init__(self, repo: DeviceBoundSessionRepository | None = None, challenges: ChallengeStore | None = None):
         self.repo = repo or DeviceBoundSessionRepository()
-        self.challenges = challenges or ChallengeStore()
+        self.challenges = challenges or refresh_challenges()
 
     def refresh(self, *, django_session, user, session_id: str | None, proof_token: str | None) -> Refreshed:
         if not session_id:

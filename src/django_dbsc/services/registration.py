@@ -6,7 +6,13 @@ from typing import cast
 from django_dbsc import conf
 from django_dbsc.constants import REGISTRATION_HEADER, RESPONSE_HEADER, SESSION_DBSC_ID
 from django_dbsc.repositories import DeviceBoundSessionRepository
-from django_dbsc.services.challenge import ChallengeStore, refresh_scope, registration_scope
+from django_dbsc.services.challenge import (
+    ChallengeStore,
+    refresh_challenges,
+    refresh_scope,
+    registration_challenges,
+    registration_scope,
+)
 from django_dbsc.services.headers import registration_header
 from django_dbsc.services.proof import ProofError, verify_registration_proof
 
@@ -45,9 +51,15 @@ class Registration:
 class RegistrationService:
     """Step 2 of DBSC: verify the browser's proof and bind the Django session to its device key."""
 
-    def __init__(self, repo: DeviceBoundSessionRepository | None = None, challenges: ChallengeStore | None = None):
+    def __init__(
+        self,
+        repo: DeviceBoundSessionRepository | None = None,
+        challenges: ChallengeStore | None = None,
+        refresh_challenge_store: ChallengeStore | None = None,
+    ):
         self.repo = repo or DeviceBoundSessionRepository()
-        self.challenges = challenges or ChallengeStore()
+        self.challenges = challenges or registration_challenges()
+        self.refresh_challenges = refresh_challenge_store or refresh_challenges()
 
     def register(self, *, django_session, user, proof_token: str | None) -> Registration:
         if user is None or not user.is_authenticated:
@@ -77,4 +89,4 @@ class RegistrationService:
         # cast: ty has no Django plugin, so it types model fields as Field rather than their value type.
         sid = cast(str, created.session_identifier)
         django_session[SESSION_DBSC_ID] = sid
-        return Registration(sid, proof.alg, self.challenges.issue(refresh_scope(sid)))
+        return Registration(sid, proof.alg, self.refresh_challenges.issue(refresh_scope(sid)))
