@@ -73,7 +73,7 @@ class RegistrationService:
         previous = django_session.get(SESSION_DBSC_ID)
         if previous:
             # WHY: a second login in an already-bound session must not leave the old device key valid.
-            self.repo.revoke(previous)
+            self.repo.revoke(previous, reason="replaced")
         # cast: ty has no Django plugin, so it types model fields as Field rather than their value type.
         sid = cast(str, created.session_identifier)
         django_session[SESSION_DBSC_ID] = sid

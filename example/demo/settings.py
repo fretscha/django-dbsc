@@ -1,5 +1,6 @@
 """Demo project for manual and real-browser testing of django-dbsc. Not for production use."""
 
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -45,7 +46,8 @@ DJANGO_DBSC = {
     "EXEMPT_PATH_PREFIXES": ["/dbsc/", "/static/"],
     # Chrome refreshes proactively when <2 min remain and allows only ~2 signings per 3-5 min, so lifetimes much
     # below 5 min get refreshes skipped with Secure-Session-Skipped: quota_exceeded. Found in real-browser testing.
-    "BOUND_COOKIE_MAX_AGE": 600,
+    # Override to reproduce the quota behaviour, e.g. DBSC_BOUND_COOKIE_MAX_AGE=20 (this triggers check W001).
+    "BOUND_COOKIE_MAX_AGE": int(os.environ.get("DBSC_BOUND_COOKIE_MAX_AGE", "600")),
 }
 
 LOGGING = {

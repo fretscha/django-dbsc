@@ -114,6 +114,7 @@ class TestSuccessfulRegistration:
         second = _register(client, DeviceKey().registration_proof(second_challenge)).json()["session_identifier"]
 
         assert DeviceBoundSession.objects.get(session_identifier=first).revoked_at is not None
+        assert DeviceBoundSession.objects.get(session_identifier=first).revoked_reason == "replaced"
         assert client.session[SESSION_DBSC_ID] == second
 
 

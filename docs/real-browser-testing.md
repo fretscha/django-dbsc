@@ -45,6 +45,23 @@ localhost.
 6. With the `enable-standard-device-bound-session-credentials-audience` flag, Chrome adds an `aud` claim. We
    ignore `aud` today, which is fine, but checking it against our origin would be a cheap hardening step.
 
+## Fix 2 verified in Chrome (quota soak)
+
+`example/scripts/quota_soak.py` with `DBSC_BOUND_COOKIE_MAX_AGE=20`, one `/protected/` load every 20 s:
+
+| Time | Chrome | Server | Session |
+|---|---|---|---|
+| +0 s | registration plus refreshes all succeed | 200 | bound |
+| +60 s | `SigningQuotaExceeded` after 6 signings in 40 s, then `Secure-Session-Skipped: quota_exceeded` | 401, *refusing without ending session* | **kept**, binding not revoked |
+| +7 min | still over quota while requests keep coming | 401 | kept |
+| +12 min (after 5.5 min idle) | refresh, 403 (stale challenge), retry, **200** | 200 | **bound again, same binding** |
+
+With a cookie this short, every page load costs **two** signings: a blocking refresh for the expired cookie, then an
+immediate proactive one because the new cookie is again under 2 minutes from expiry. Continuous traffic keeps
+Chrome over quota. Recovery needed a quiet period. Before fix 2, the first skipped refresh logged the user out.
+
+The run also showed that replacing a binding on re-login left `revoked_reason` empty. It now records `"replaced"`.
+
 ## Setup
 
 DBSC on macOS is rolled out via Finch and may be off. When it's off, Chrome **silently** ignores the header.
