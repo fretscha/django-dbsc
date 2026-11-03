@@ -1,0 +1,57 @@
+[project]
+name = "django-dbsc"
+version = "0.0.1"
+description = "Device Bound Session Credentials (W3C DBSC) for Django: bind session cookies to a device key."
+readme = "README.md"
+authors = [
+    { name = "Frederic Tschannen", email = "fretscha@umx.net" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "django>=5.2",
+    "http-sf>=1.5",
+    "pyjwt[crypto]>=2.10",
+]
+keywords = ["django", "dbsc", "device-bound-session-credentials", "session", "security", "cookie-theft"]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Framework :: Django",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP :: Session",
+    "Topic :: Security",
+]
+
+[project.urls]
+Specification = "https://w3c.github.io/webappsec-dbsc/"
+
+[build-system]
+requires = ["uv_build>=0.13.5,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "pytest-django>=4.14.0",
+    "ruff>=0.17.3",
+    "ty>=0.0.96",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = ["src/django_dbsc/migrations"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "DJ", "PT", "SIM", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106", "S107"]
+"src/django_dbsc/models.py" = ["RUF012"]  # Django Meta attributes are class-level by design
