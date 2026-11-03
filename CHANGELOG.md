@@ -6,7 +6,7 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
-## [0.1.0] - unreleased
+## [0.1.0] - 2026-11-03
 
 First usable release. It implements the server side of the
 [W3C DBSC draft](https://w3c.github.io/webappsec-dbsc/), verified end to end in Chrome 156.
