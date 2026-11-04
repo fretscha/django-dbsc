@@ -43,10 +43,17 @@ localhost.
    last response and signs it at the next refresh, about `BOUND_COOKIE_MAX_AGE - 120 s` later. The challenge TTL was
    120 s. **Fixed:** refresh challenges live `BOUND_COOKIE_MAX_AGE + 60` s (setting `REFRESH_CHALLENGE_TTL`), and
    registration challenges stay at 120 s. Verified in Chrome: the proactive refresh is now a single 200 using the
-   challenge from the previous refresh (`challengeResult: Success`). **Still open:** the *first* refresh after
-   registration still takes one 403 retry. Chrome appears not to use the challenge sent on the register response,
-   probably because the session it names doesn't exist on Chrome's side yet. The DevTools event stream didn't show
-   registrations reliably enough to confirm this. The cost is one extra round trip per session.
+   challenge from the previous refresh (`challengeResult: Success`). The *first* refresh after
+   registration still needed a 403 retry. Two causes stacked up:
+   - **Chrome ignores the challenge on the register response.** DevTools reports `challengeResult: NoSessionMatch`,
+     because the session it names doesn't exist on Chrome's side yet. **Fixed:** the first bound response after
+     registration carries a fresh refresh challenge, and Chrome caches it (`Success`).
+   - **The demo lost its cache.** gunicorn's default sync worker was killed after 30 s (`WORKER TIMEOUT`) while
+     Chrome held an idle TLS connection, and the per-process `LocMemCache` died with it. That emptied the server's
+     challenges. **Fixed in the demo:** a file-based cache and `--threads 4`.
+
+   Verified in Chrome: the first refresh after registration is now a single `200`, signed with the challenge from
+   the first bound page (the probe logs `in_active=True`).
 6. With the `enable-standard-device-bound-session-credentials-audience` flag, Chrome adds an `aud` claim. We
    ignore `aud` today, which is fine, but checking it against our origin would be a cheap hardening step.
 
@@ -84,7 +91,8 @@ SPKI=$(openssl x509 -in $SP/cert.pem -pubkey -noout | openssl pkey -pubin -outfo
 # 2. Demo server over HTTPS.
 cd example && uv run python manage.py migrate && \
   DJANGO_SUPERUSER_PASSWORD=demo-pw uv run python manage.py createsuperuser --noinput --username alice --email a@x.y
-uv run --with gunicorn gunicorn demo.wsgi --bind 127.0.0.1:8443 --certfile $SP/cert.pem --keyfile $SP/key.pem
+# --threads: a sync worker blocks on Chrome's idle TLS connection and is killed after 30 s.
+uv run --with gunicorn gunicorn demo.wsgi --bind 127.0.0.1:8443 --certfile $SP/cert.pem --keyfile $SP/key.pem --threads 4
 
 # 3. Isolated Chrome with DBSC forced on and DevTools on port 9333.
 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \

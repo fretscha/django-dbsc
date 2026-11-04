@@ -47,11 +47,14 @@ Look for `bound cookie missing/invalid, ending session` in the logs.
 ## Refreshes keep returning 403
 
 A single `403` followed by a `200` is normal. It's the "here's a fresh challenge, retry" round trip, and it happens
-at least once per session. Repeated `403`s for the same session mean the challenge the browser signed is never
+typically after a session sat idle for longer than the refresh challenge lifetime. Repeated `403`s for the same
+session mean the challenge the browser signed is never
 found:
 
 - **The cache is per process** (`LocMemCache` with several workers). The challenge was issued by one worker and
-  checked by another. Use a shared cache.
+  checked by another. Use a shared cache. This also bites with a *single* worker that gets restarted: gunicorn's
+  sync worker is killed after 30 s when a browser holds an idle TLS connection (`WORKER TIMEOUT` in its log), and a
+  per-process cache dies with it. Use threaded workers (`--threads`) or an async server.
 - **The cache is evicting entries** under memory pressure. Give it more room, or use a dedicated cache.
 
 ## Users with `REQUIRE_BINDING` are logged out after ~30 s

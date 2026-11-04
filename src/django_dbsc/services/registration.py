@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import cast
 
 from django_dbsc import conf
-from django_dbsc.constants import REGISTRATION_HEADER, RESPONSE_HEADER, SESSION_DBSC_ID
+from django_dbsc.constants import REGISTRATION_HEADER, RESPONSE_HEADER, SESSION_CHALLENGE_PENDING, SESSION_DBSC_ID
 from django_dbsc.repositories import DeviceBoundSessionRepository
 from django_dbsc.services.challenge import (
     ChallengeStore,
@@ -89,4 +89,5 @@ class RegistrationService:
         # cast: ty has no Django plugin, so it types model fields as Field rather than their value type.
         sid = cast(str, created.session_identifier)
         django_session[SESSION_DBSC_ID] = sid
+        django_session[SESSION_CHALLENGE_PENDING] = True
         return Registration(sid, proof.alg, self.refresh_challenges.issue(refresh_scope(sid)))
