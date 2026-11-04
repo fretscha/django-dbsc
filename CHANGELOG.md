@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Releases are published with signed PEP 740 attestations (PyPI "provenance"), via `pypa/gh-action-pypi-publish`.
+  0.1.0 was uploaded without them, and attestations can't be added after upload.
+
 ## [0.1.0] - 2026-11-03
 
 First usable release. It implements the server side of the

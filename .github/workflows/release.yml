@@ -45,7 +45,8 @@ jobs:
         with:
           name: dist
           path: dist/
-      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+      # The PyPA action, not `uv publish`: it also signs and uploads PEP 740 attestations (PyPI "provenance"),
+      # linking each file to this workflow run. Attestations can only be sent with the upload, never added later.
+      - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
         with:
-          enable-cache: false
-      - run: uv publish --trusted-publishing always
+          attestations: true
