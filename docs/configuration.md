@@ -12,6 +12,7 @@ DJANGO_DBSC = {
     "STEP_UP_URL": None,
     "REQUIRE_BINDING": None,
     "BINDING_GRACE_SECONDS": 30,
+    "BINDING_REQUIRED_URL": None,
 }
 ```
 
@@ -103,6 +104,19 @@ policy a fair start.
 
 Registration usually finishes in under a second. The margin covers slow devices and networks.
 
+### `BINDING_REQUIRED_URL`
+
+**Default:** `None`
+
+Where users are sent when `REQUIRE_BINDING` ends their session because their browser couldn't bind. The session is
+ended first, so the page is shown to an anonymous visitor. With `None`, the template
+`django_dbsc/binding_required.html` is rendered with status `403`. Override it to match your site. Without a
+template engine, the response is a plain-text `403`.
+
+```python
+"BINDING_REQUIRED_URL": "/help/supported-browsers/",
+```
+
 ## Other names you may need
 
 | Name | Value | Notes |
@@ -111,6 +125,7 @@ Registration usually finishes in under a second. The margin covers slow devices 
 | URL names | `django_dbsc:register`, `django_dbsc:refresh` | from `include("django_dbsc.urls")` |
 | Logger | `django_dbsc` | see [Logging](guide.md#logging) |
 | System check | `django_dbsc.W001` | `BOUND_COOKIE_MAX_AGE` below 300 s |
+| Template | `django_dbsc/binding_required.html` | shown on `REQUIRE_BINDING` violations, overridable |
 | Request attribute | `request.dbsc_bound` | set by the middleware |
 | Model | `django_dbsc.DeviceBoundSession` | one row per binding, never deleted |
 

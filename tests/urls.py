@@ -38,6 +38,7 @@ urlpatterns = [
     path("bound-status/", bound_status_view, name="bound-status"),
     path("sensitive/", sensitive_view, name="sensitive"),
     path("login/", login_view, name="login"),
+    path("browser-required/", lambda request: HttpResponse("please use a supported browser"), name="browser-required"),
     path("logout/", logout_view, name="logout"),
     path("dbsc/", include("django_dbsc.urls")),
 ]

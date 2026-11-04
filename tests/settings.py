@@ -20,6 +20,8 @@ MIDDLEWARE = [
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 
+TEMPLATES = [{"BACKEND": "django.template.backends.django.DjangoTemplates", "APP_DIRS": True}]
+
 DJANGO_DBSC = {
     "EXEMPT_PATH_PREFIXES": ["/dbsc/", "/static/"],
 }
