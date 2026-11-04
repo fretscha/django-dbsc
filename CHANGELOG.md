@@ -11,6 +11,10 @@ All notable changes to this project are documented here. The format follows
 - Releases are published with signed PEP 740 attestations (PyPI "provenance"), via `pypa/gh-action-pypi-publish`.
   0.1.0 was uploaded without them, and attestations can't be added after upload.
 
+### Fixed
+
+- Links in the README (which is also the PyPI project page) are now absolute, so they work on pypi.org.
+
 ## [0.1.0] - 2026-11-03
 
 First usable release. It implements the server side of the
