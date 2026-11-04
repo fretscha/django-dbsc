@@ -16,8 +16,8 @@ With DBSC:     stolen sessionid  ──▶  401 (no device key, no valid bound c
   staff.
 
 > **Status: alpha (0.1.0).** It has been verified end to end in Chrome 156 (see
-> [docs/real-browser-testing.md](docs/real-browser-testing.md)). The API may still change before 1.0. See the
-> [CHANGELOG](CHANGELOG.md) for known limitations.
+> [docs/real-browser-testing.md](https://github.com/fretscha/django-dbsc/blob/main/docs/real-browser-testing.md)). The API may still change before 1.0. See the
+> [CHANGELOG](https://github.com/fretscha/django-dbsc/blob/main/CHANGELOG.md) for known limitations.
 
 ## Requirements
 
@@ -87,10 +87,10 @@ def change_password(request): ...
 
 | Read this | If you want to |
 |---|---|
-| [User guide](docs/guide.md) | understand the three protection modes, use `request.dbsc_bound` and the decorator, revoke devices, deploy |
-| [Configuration](docs/configuration.md) | look up a setting, its default and when to change it |
-| [How it works & security model](docs/security.md) | know exactly what is and isn't protected |
-| [Troubleshooting](docs/troubleshooting.md) | find out why a browser doesn't bind, or why users get logged out |
+| [User guide](https://github.com/fretscha/django-dbsc/blob/main/docs/guide.md) | understand the three protection modes, use `request.dbsc_bound` and the decorator, revoke devices, deploy |
+| [Configuration](https://github.com/fretscha/django-dbsc/blob/main/docs/configuration.md) | look up a setting, its default and when to change it |
+| [How it works & security model](https://github.com/fretscha/django-dbsc/blob/main/docs/security.md) | know exactly what is and isn't protected |
+| [Troubleshooting](https://github.com/fretscha/django-dbsc/blob/main/docs/troubleshooting.md) | find out why a browser doesn't bind, or why users get logged out |
 
 ## Browser support
 
@@ -106,4 +106,4 @@ You don't need to detect support. Browsers without DBSC ignore the registration 
 
 ## License
 
-[MIT](LICENSE)
+[MIT](https://github.com/fretscha/django-dbsc/blob/main/LICENSE)
