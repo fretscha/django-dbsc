@@ -1,6 +1,6 @@
 [project]
 name = "django-dbsc"
-version = "0.1.0"
+version = "0.1.1"
 description = "Device Bound Session Credentials (W3C DBSC) for Django: bind session cookies to a device key."
 readme = "README.md"
 license = "MIT"

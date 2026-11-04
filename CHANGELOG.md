@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-04
+
 ### Changed
 
 - Releases are published with signed PEP 740 attestations (PyPI "provenance"), via `pypa/gh-action-pypi-publish`.
@@ -48,5 +50,6 @@ First usable release. It implements the server side of the
 - The first refresh after registration takes one extra `403` round trip in Chrome.
 - Site-scoped sessions (`include_site`) and federated sessions are not supported.
 
-[Unreleased]: https://github.com/fretscha/django-dbsc/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/fretscha/django-dbsc/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/fretscha/django-dbsc/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/fretscha/django-dbsc/releases/tag/v0.1.0
