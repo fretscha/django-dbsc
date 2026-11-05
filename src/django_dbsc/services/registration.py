@@ -34,6 +34,15 @@ def offer_registration(request, response, challenges: ChallengeStore) -> None:
     response.headers[REGISTRATION_HEADER] = registration_header(path=conf.get("REGISTRATION_PATH"), challenge=challenge)
 
 
+async def aoffer_registration(request, response, challenges: ChallengeStore) -> None:
+    if not getattr(request, _OFFER_FLAG, False):
+        return
+    if request.session.session_key is None:
+        await request.session.asave()
+    challenge = await challenges.aissue(registration_scope(request.session.session_key))
+    response.headers[REGISTRATION_HEADER] = registration_header(path=conf.get("REGISTRATION_PATH"), challenge=challenge)
+
+
 class RegistrationError(Exception):
     def __init__(self, status: int, reason: str):
         super().__init__(reason)

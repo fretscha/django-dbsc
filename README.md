@@ -17,6 +17,7 @@ With DBSC:     stolen sessionid  ──▶  401 (no device key, no valid bound c
 - **Graceful:** browsers without DBSC support keep working exactly as before.
 - **Your choice of strictness:** protect everyone opportunistically, guard sensitive views, or *require* binding for
   staff.
+- **WSGI and ASGI:** the middleware and decorator run natively async under ASGI.
 
 > **Status: alpha (0.1.0).** It has been verified end to end in Chrome 156 (see
 > [docs/real-browser-testing.md](https://github.com/fretscha/django-dbsc/blob/main/docs/real-browser-testing.md)). The API may still change before 1.0. See the

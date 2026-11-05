@@ -52,6 +52,13 @@ class ChallengeStore:
         self._save(scope, entries[-self.keep :])
         return challenge
 
+    async def aissue(self, scope: str) -> str:
+        challenge = secrets.token_urlsafe(32)
+        entries = self._filter_fresh(await self.cache.aget(KEY_PREFIX + scope, []))
+        entries.append((challenge, self.clock()))
+        await self.cache.aset(KEY_PREFIX + scope, entries[-self.keep :], timeout=self.ttl)
+        return challenge
+
     def active(self, scope: str) -> set[str]:
         return {challenge for challenge, _ in self._fresh(scope)}
 
@@ -68,8 +75,11 @@ class ChallengeStore:
         return True
 
     def _fresh(self, scope: str) -> list[tuple[str, float]]:
+        return self._filter_fresh(self.cache.get(KEY_PREFIX + scope, []))
+
+    def _filter_fresh(self, entries: list[tuple[str, float]]) -> list[tuple[str, float]]:
         cutoff = self.clock() - self.ttl
-        return [e for e in self.cache.get(KEY_PREFIX + scope, []) if e[1] > cutoff]
+        return [e for e in entries if e[1] > cutoff]
 
     def _save(self, scope: str, entries: list[tuple[str, float]]) -> None:
         self.cache.set(KEY_PREFIX + scope, entries, timeout=self.ttl)
