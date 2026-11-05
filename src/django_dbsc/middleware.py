@@ -1,7 +1,9 @@
 import logging
 
 from django.db import DatabaseError
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect
+from django.shortcuts import render
+from django.template import TemplateDoesNotExist
 
 from django_dbsc import conf
 from django_dbsc.constants import BOUND_COOKIE_NAME, SESSION_DBSC_ID, SKIPPED_HEADER
@@ -80,8 +82,16 @@ class DeviceBoundSessionMiddleware:
             request.user.pk,
             request.path,
         )
+        # WHY flush before redirecting: the target page then sees an anonymous session, so it can't loop back here.
         request.session.flush()
-        return HttpResponseForbidden("This account requires a browser that supports device-bound sessions.")
+        url = conf.get("BINDING_REQUIRED_URL")
+        if url:
+            return HttpResponseRedirect(url)
+        try:
+            return render(request, "django_dbsc/binding_required.html", status=403)
+        except TemplateDoesNotExist:
+            # Projects without a template engine (pure APIs) still get a clean 403, never a 500.
+            return HttpResponseForbidden("This account requires a browser that supports device-bound sessions.")
 
     def _revoke(self, dbsc_id: str, reason: str) -> None:
         # WHY revoke as well as flush: otherwise the binding lingers as an "active" record for a dead session.

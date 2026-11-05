@@ -13,6 +13,9 @@ DEFAULTS = {
     # None means opportunistic only.
     "REQUIRE_BINDING": None,
     "BINDING_GRACE_SECONDS": 30,
+    # Where REQUIRE_BINDING violations are redirected (after the session is ended). None means render
+    # django_dbsc/binding_required.html with status 403.
+    "BINDING_REQUIRED_URL": None,
 }
 
 

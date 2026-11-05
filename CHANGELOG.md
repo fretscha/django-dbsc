@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `REQUIRE_BINDING` violations show an explanatory page instead of a bare `403`: the overridable template
+  `django_dbsc/binding_required.html`, or a redirect to the new `BINDING_REQUIRED_URL` setting.
+
 ## [0.1.1] - 2026-11-04
 
 ### Changed

@@ -98,7 +98,22 @@ How it behaves:
 1. A matching user logs in and their session is "pending". They can browse normally for `BINDING_GRACE_SECONDS`.
    That gives the background registration time to finish.
 2. If the session is bound within that time, nothing else happens.
-3. If it's still unbound afterwards, the next request is answered with `403` and the session is ended.
+3. If it's still unbound afterwards, the session is ended, and the user sees a page explaining that this account
+   needs a supported browser.
+
+That page is the template `django_dbsc/binding_required.html`, served with status `403`. Override it in your own
+templates directory to match your site and name the browser your users should use. You can also send users to a page
+of your own instead:
+
+```python
+DJANGO_DBSC = {
+    "REQUIRE_BINDING": "django_dbsc.policies.staff_only",
+    "BINDING_REQUIRED_URL": "/help/supported-browsers/",
+}
+```
+
+The session is ended *before* the redirect, so that page is shown to an anonymous visitor and can't loop back into
+the policy. Projects without a template engine get a plain-text `403`.
 
 Built-in policies, all in `django_dbsc.policies`:
 
@@ -124,8 +139,8 @@ Things to know:
 
 - **Rolling it out is safe for existing sessions.** Sessions created before you enabled the policy get their grace
   period from the first request seen afterwards, not from their original login.
-- **Users on unsupported browsers get logged out after the grace period.** They will keep being logged out at every
-  login. Tell those users in advance which browser they need.
+- **Users on unsupported browsers get logged out after the grace period**, and again at every later login. Tell
+  them in advance which browser they need, and use the page above to tell them again when it happens.
 - An invalid dotted path makes Django fail at startup (`ImproperlyConfigured`), not on the first request.
 
 ## Checking binding in your own code
