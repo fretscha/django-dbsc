@@ -35,6 +35,20 @@ class BindingPolicy:
         # WHY stamp on first sighting rather than at login: sessions that predate the policy, or users promoted to
         # staff mid-session, still get a fair grace period instead of being logged out on rollout.
         since = session.setdefault(SESSION_BINDING_REQUIRED_SINCE, now)
+        return self._verdict(now, since)
+
+    async def aevaluate(self, session, auser) -> Verdict:
+        """Async twin of evaluate(). Takes ``request.auser`` so the user is only loaded if a policy is configured."""
+        if self.requires is None:
+            return Verdict.NOT_REQUIRED
+        user = await auser()
+        if not user.is_authenticated or not self.requires(user):
+            return Verdict.NOT_REQUIRED
+        now = int(self.clock())
+        since = await session.asetdefault(SESSION_BINDING_REQUIRED_SINCE, now)
+        return self._verdict(now, since)
+
+    def _verdict(self, now: int, since: int) -> Verdict:
         return Verdict.PENDING if now - since <= self.grace_seconds else Verdict.VIOLATION
 
 

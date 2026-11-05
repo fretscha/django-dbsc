@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import aauthenticate, alogin, alogout, authenticate, login, logout
 from django.http import HttpResponse
 from django.urls import include, path
 from django.views.decorators.csrf import csrf_exempt
@@ -33,7 +33,38 @@ def sensitive_view(request):
     return HttpResponse("sensitive")
 
 
+# Async twins: the same behaviour through the ASGI path (tests/test_async.py).
+@csrf_exempt
+@require_POST
+async def async_login_view(request):
+    user = await aauthenticate(request, username=request.POST["username"], password=request.POST["password"])
+    if user is None:
+        return HttpResponse("bad credentials", status=401)
+    await alogin(request, user)
+    return HttpResponse("welcome")
+
+
+@csrf_exempt
+@require_POST
+async def async_logout_view(request):
+    await alogout(request)
+    return HttpResponse("bye")
+
+
+async def async_bound_status_view(request):
+    return HttpResponse(str(request.dbsc_bound))
+
+
+@device_bound_required
+async def async_sensitive_view(request):
+    return HttpResponse("sensitive")
+
+
 urlpatterns = [
+    path("async/login/", async_login_view),
+    path("async/logout/", async_logout_view),
+    path("async/bound-status/", async_bound_status_view),
+    path("async/sensitive/", async_sensitive_view),
     path("protected/", lambda request: HttpResponse("ok"), name="protected"),
     path("bound-status/", bound_status_view, name="bound-status"),
     path("sensitive/", sensitive_view, name="sensitive"),

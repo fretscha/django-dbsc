@@ -8,6 +8,8 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Native async support under ASGI. `DeviceBoundSessionMiddleware` is sync- and async-capable, and its async path
+  uses Django's async session, user, cache and ORM APIs. `@device_bound_required` keeps `async def` views async.
 - `REQUIRE_BINDING` violations show an explanatory page instead of a bare `403`: the overridable template
   `django_dbsc/binding_required.html`, or a redirect to the new `BINDING_REQUIRED_URL` setting.
 

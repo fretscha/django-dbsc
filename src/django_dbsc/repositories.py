@@ -33,6 +33,12 @@ class DeviceBoundSessionRepository:
     def revoke(self, session_identifier: str, reason: str = "") -> bool:
         return self._revoke(reason, session_identifier=session_identifier) > 0
 
+    async def arevoke(self, session_identifier: str, reason: str = "") -> bool:
+        updated = await DeviceBoundSession.objects.filter(
+            revoked_at__isnull=True, session_identifier=session_identifier
+        ).aupdate(revoked_at=timezone.now(), revoked_reason=reason)
+        return updated > 0
+
     def revoke_all_for_user(self, user, reason: str = "") -> int:
         return self._revoke(reason, user=user)
 

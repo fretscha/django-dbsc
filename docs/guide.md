@@ -7,6 +7,7 @@ choose a protection mode, and what to check before deploying.
 - [Choosing a protection mode](#choosing-a-protection-mode)
 - [Checking binding in your own code](#checking-binding-in-your-own-code)
 - [Logging out and revoking devices](#logging-out-and-revoking-devices)
+- [Running under ASGI (async)](#running-under-asgi-async)
 - [Deployment checklist](#deployment-checklist)
 - [Local development over HTTPS](#local-development-over-https)
 - [Logging](#logging)
@@ -188,6 +189,25 @@ then refused, and the session ends. To cut access off immediately, also end the 
 | your own string | you called `revoke()` or `revoke_all_for_user()` with a `reason` |
 
 The first reason is kept. A later revocation never overwrites it.
+
+## Running under ASGI (async)
+
+django-dbsc works under WSGI and ASGI with the same settings. Under ASGI (uvicorn, daphne, hypercorn, …):
+
+- **The middleware runs natively async.** It reads the session with `aget()`, loads the user with
+  `request.auser()` (only when `REQUIRE_BINDING` is set), and uses the async cache and ORM APIs. It doesn't force
+  Django to run your async views in a thread.
+- **`@device_bound_required` works on `async def` views** and keeps them async.
+- **`alogin()` and `alogout()`** trigger the registration offer and the revocation, just like `login()` and `logout()`.
+- **The `/dbsc/register` and `/dbsc/refresh` endpoints are sync views.** A browser calls them a few times per
+  session, and Django runs them in a thread pool, which is fine at that rate.
+
+To keep the whole request path async, every middleware in `MIDDLEWARE` must be async-capable. Django's own
+`SessionMiddleware`, `CsrfViewMiddleware` and `AuthenticationMiddleware` are. A single sync-only middleware makes
+Django switch to a thread for everything inside it.
+
+Async database access in Django (and so database-backed sessions) still uses a thread pool internally. Native async
+here means django-dbsc doesn't add thread switches of its own, not that Django has none.
 
 ## Deployment checklist
 
