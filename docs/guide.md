@@ -236,9 +236,13 @@ The first reason is kept. A later revocation never overwrites it.
 Chrome ignores DBSC on `http://localhost`. You need a trusted certificate locally, for example with
 [mkcert](https://github.com/FiloSottile/mkcert):
 
+Use `--threads` (or any non-sync server), plus a cache that outlives a worker process. A sync worker blocks on the
+browser's idle TLS connection and is killed after 30 s, and Django's default per-process cache, with all its
+challenges, dies with it.
+
 ```bash
 mkcert -install && mkcert localhost
-uv run --with gunicorn gunicorn myproject.wsgi --bind 127.0.0.1:8443 \
+uv run --with gunicorn gunicorn myproject.wsgi --bind 127.0.0.1:8443 --threads 4 \
   --certfile localhost.pem --keyfile localhost-key.pem
 ```
 

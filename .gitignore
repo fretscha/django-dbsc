@@ -11,3 +11,4 @@ wheels/
 
 # example project
 example/demo.sqlite3
+example/.cache/

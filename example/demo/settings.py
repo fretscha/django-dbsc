@@ -39,6 +39,13 @@ TEMPLATES = [
 ]
 
 DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "demo.sqlite3"}}
+
+# WHY not the default LocMemCache: it lives inside one worker process, and challenges die with it. gunicorn's sync
+# worker is killed after 30 s when Chrome holds an idle TLS connection, which looked like a DBSC bug in testing.
+# Real deployments need a shared cache too (see docs/guide.md, deployment checklist).
+CACHES = {
+    "default": {"BACKEND": "django.core.cache.backends.filebased.FileBasedCache", "LOCATION": BASE_DIR / ".cache"}
+}
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "demo" / "static"]
 

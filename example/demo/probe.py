@@ -18,6 +18,8 @@ class DbscProbeMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        if request.path.endswith("/dbsc/refresh"):
+            self._log_challenge_state(request)
         response = self.get_response(request)
         seen = {h: request.headers[h] for h in WATCHED if h in request.headers}
         if "Secure-Session-Response" in request.headers:
@@ -33,3 +35,21 @@ class DbscProbeMiddleware:
             sent,
         )
         return response
+
+    @staticmethod
+    def _log_challenge_state(request) -> None:
+        """Diagnostics: which challenge did the browser sign, and which does the server consider active?"""
+        import jwt
+
+        from django_dbsc.services.challenge import refresh_challenges, refresh_scope
+
+        sid = request.headers.get("Sec-Secure-Session-Id", "")
+        token = request.headers.get("Secure-Session-Response")
+        jti = jwt.decode(token, options={"verify_signature": False}).get("jti", "") if token else ""
+        active = refresh_challenges().active(refresh_scope(sid))
+        logger.info(
+            "[PROBE] refresh signed jti=%s in_active=%s active=%s",
+            jti[:8] or "-",
+            jti in active,
+            sorted(c[:8] for c in active),
+        )
