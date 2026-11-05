@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-05
+
 ### Added
 
 - Native async support under ASGI. `DeviceBoundSessionMiddleware` is sync- and async-capable, and its async path
@@ -62,6 +64,7 @@ First usable release. It implements the server side of the
 - The first refresh after registration takes one extra `403` round trip in Chrome.
 - Site-scoped sessions (`include_site`) and federated sessions are not supported.
 
-[Unreleased]: https://github.com/fretscha/django-dbsc/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/fretscha/django-dbsc/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/fretscha/django-dbsc/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/fretscha/django-dbsc/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/fretscha/django-dbsc/releases/tag/v0.1.0
