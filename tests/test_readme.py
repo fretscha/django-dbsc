@@ -4,7 +4,8 @@ import re
 from pathlib import Path
 
 README = Path(__file__).resolve().parent.parent / "README.md"
-LINK = re.compile(r"!?\[[^\]]*\]\(([^)\s]+)")
+# Every "](target)" - also catches the outer link of nested badge links like [![alt](image)](target).
+LINK = re.compile(r"\]\(([^)\s]+)\)")
 
 
 def test_readme_links_are_absolute():

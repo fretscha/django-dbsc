@@ -28,6 +28,16 @@ jobs:
           DJANGO_SETTINGS_MODULE: tests.settings
           PYTHONPATH: .
 
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+      - name: pytest with branch coverage (fails below fail_under in pyproject.toml)
+        run: uv run --locked pytest -q --cov --cov-report=term
+
   test:
     runs-on: ubuntu-latest
     strategy:

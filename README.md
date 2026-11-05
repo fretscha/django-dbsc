@@ -1,5 +1,8 @@
 # django-dbsc
 
+[![CI](https://github.com/fretscha/django-dbsc/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/fretscha/django-dbsc/actions/workflows/ci.yml?query=branch%3Amain)
+[![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Ffretscha%2Fdjango-dbsc%2Fbadges%2Fcoverage.json)](https://github.com/fretscha/django-dbsc/actions/workflows/badges.yml)
+
 **Stolen session cookies stop working.** django-dbsc adds [Device Bound Session Credentials
 (DBSC)](https://w3c.github.io/webappsec-dbsc/) to Django: after login, the browser binds the session to a private key
 that never leaves the device (TPM or Secure Enclave). An attacker who copies the `sessionid` cookie with malware or an

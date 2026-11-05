@@ -44,6 +44,7 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "pytest>=9.2.0",
+    "pytest-cov>=7.1",
     "pytest-django>=4.14.0",
     "ruff>=0.17.3",
     "ty>=0.0.96",
@@ -69,3 +70,13 @@ select = ["E", "F", "W", "I", "B", "UP", "S", "DJ", "PT", "SIM", "RUF"]
 # Local real-browser harness: urlopen on our own BASE, unverified TLS for the throwaway localhost cert.
 "example/scripts/**" = ["S310", "S323"]
 "example/demo/settings.py" = ["S105"]
+
+[tool.coverage.run]
+source = ["django_dbsc"]
+branch = true
+
+[tool.coverage.report]
+# CI fails below this. The README badge shows the actual number.
+fail_under = 95
+show_missing = true
+skip_covered = true
