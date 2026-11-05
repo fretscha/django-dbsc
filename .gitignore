@@ -12,3 +12,9 @@ wheels/
 # example project
 example/demo.sqlite3
 example/.cache/
+
+# coverage.py data
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/

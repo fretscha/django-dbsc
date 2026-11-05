@@ -1,0 +1,51 @@
+name: Badges
+
+# Publishes the coverage number for the README badge to the orphan `badges` branch, which shields.io renders.
+# This is a separate workflow because it needs `contents: write`. In ci.yml that would break the release workflow,
+# which calls ci.yml with read-only permissions (GitHub rejects the call even if the job would be skipped).
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: badges
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # only to push the badges branch; main itself is protected
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+        with:
+          enable-cache: false
+      - name: Measure coverage
+        id: cov
+        run: |
+          uv run --locked pytest -q --cov --cov-report= --cov-fail-under=0
+          echo "percent=$(uv run --locked coverage report --format=total)" >> "$GITHUB_OUTPUT"
+      - name: Publish badge JSON to the badges branch
+        env:
+          PERCENT: ${{ steps.cov.outputs.percent }}
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          case "$PERCENT" in ''|*[!0-9]*) echo "unexpected coverage value: $PERCENT"; exit 1;; esac
+          if   [ "$PERCENT" -ge 95 ]; then color=brightgreen
+          elif [ "$PERCENT" -ge 90 ]; then color=green
+          elif [ "$PERCENT" -ge 80 ]; then color=yellow
+          else color=red; fi
+          mkdir badges && cd badges
+          printf '{"schemaVersion": 1, "label": "coverage", "message": "%s%%", "color": "%s"}\n' "$PERCENT" "$color" > coverage.json
+          git init -q -b badges
+          git add coverage.json
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "coverage ${PERCENT}%"
+          git push -q --force "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" badges
