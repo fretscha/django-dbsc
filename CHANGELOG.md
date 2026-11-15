@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `SECURITY.md`: how to report a vulnerability privately, and what is in scope.
+- README: a real-browser run showing a stolen `sessionid` being refused.
+
 ## [0.2.0] - 2026-11-14
 
 ### Added

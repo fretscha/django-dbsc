@@ -2,6 +2,10 @@
 
 [![CI](https://github.com/fretscha/django-dbsc/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/fretscha/django-dbsc/actions/workflows/ci.yml?query=branch%3Amain)
 [![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Ffretscha%2Fdjango-dbsc%2Fbadges%2Fcoverage.json)](https://github.com/fretscha/django-dbsc/actions/workflows/badges.yml)
+[![PyPI](https://img.shields.io/pypi/v/django-dbsc)](https://pypi.org/project/django-dbsc/)
+[![Python versions](https://img.shields.io/pypi/pyversions/django-dbsc)](https://pypi.org/project/django-dbsc/)
+[![Django versions](https://img.shields.io/pypi/djversions/django-dbsc)](https://pypi.org/project/django-dbsc/)
+[![License: MIT](https://img.shields.io/pypi/l/django-dbsc)](https://github.com/fretscha/django-dbsc/blob/main/LICENSE)
 
 **Stolen session cookies stop working.** django-dbsc adds [Device Bound Session Credentials
 (DBSC)](https://w3c.github.io/webappsec-dbsc/) to Django: after login, the browser binds the session to a private key
@@ -19,9 +23,38 @@ With DBSC:     stolen sessionid  ──▶  401 (no device key, no valid bound c
   staff.
 - **WSGI and ASGI:** the middleware and decorator run natively async under ASGI.
 
-> **Status: alpha (0.1.0).** It has been verified end to end in Chrome 156 (see
-> [docs/real-browser-testing.md](https://github.com/fretscha/django-dbsc/blob/main/docs/real-browser-testing.md)). The API may still change before 1.0. See the
-> [CHANGELOG](https://github.com/fretscha/django-dbsc/blob/main/CHANGELOG.md) for known limitations.
+> **Status: alpha.** It has been verified end to end in Chrome 156 (see
+> [docs/real-browser-testing.md](https://github.com/fretscha/django-dbsc/blob/main/docs/real-browser-testing.md)), but
+> it has not had an independent security review yet. The API may still change before 1.0. See the
+> [CHANGELOG](https://github.com/fretscha/django-dbsc/blob/main/CHANGELOG.md) for known limitations. Feedback and
+> review are very welcome. To report a vulnerability, see
+> [SECURITY.md](https://github.com/fretscha/django-dbsc/blob/main/SECURITY.md).
+
+## See it work
+
+A real run of the `example/` project in Chrome 157 on macOS (output abridged). Alice logs in, Chrome binds her session to a key in the
+Secure Enclave, and then an "attacker" replays her `sessionid` cookie from outside the browser:
+
+```
+$ python example/scripts/drive_chrome.py login
+  landed on https://localhost:8443/protected/: 'protected ok user=alice dbsc_bound=False'
+  cookies: ['csrftoken', 'dbsc_bound', 'sessionid']
+  GET /protected/ -> 200 'protected ok user=alice dbsc_bound=True'
+
+$ python example/scripts/drive_chrome.py steal
+  attacker replaying only sessionid -> 401
+```
+
+The server log shows what happened to the stolen cookie:
+
+```
+INFO    django_dbsc [DBSC] session bound user_id=1 dbsc_id=tEJtINGR… alg=ES256
+WARNING django_dbsc [DBSC] bound cookie missing/invalid, ending session dbsc_id=tEJtINGR… path=/protected/
+```
+
+The first page after login is still unbound because Chrome registers in the background. The replayed cookie is
+refused, and the session is ended on the server, so the cookie is worthless from then on. To reproduce it, follow
+[docs/real-browser-testing.md](https://github.com/fretscha/django-dbsc/blob/main/docs/real-browser-testing.md).
 
 ## Requirements
 
