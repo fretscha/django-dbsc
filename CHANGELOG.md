@@ -6,10 +6,19 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-24
+
+Documentation only. The code is identical to 0.2.0. This release exists so the PyPI project page shows the current
+README.
+
 ### Added
 
 - `SECURITY.md`: how to report a vulnerability privately, and what is in scope.
 - README: a real-browser run showing a stolen `sessionid` being refused.
+
+### Changed
+
+- README: the status line no longer names 0.1.0, and says that there has been no independent security review yet.
 
 ## [0.2.0] - 2026-11-14
 
@@ -69,7 +78,8 @@ First usable release. It implements the server side of the
 - The first refresh after registration takes one extra `403` round trip in Chrome.
 - Site-scoped sessions (`include_site`) and federated sessions are not supported.
 
-[Unreleased]: https://github.com/fretscha/django-dbsc/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/fretscha/django-dbsc/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/fretscha/django-dbsc/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/fretscha/django-dbsc/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/fretscha/django-dbsc/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/fretscha/django-dbsc/releases/tag/v0.1.0
