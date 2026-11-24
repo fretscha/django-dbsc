@@ -4,7 +4,7 @@
 [![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Ffretscha%2Fdjango-dbsc%2Fbadges%2Fcoverage.json)](https://github.com/fretscha/django-dbsc/actions/workflows/badges.yml)
 [![PyPI](https://img.shields.io/pypi/v/django-dbsc)](https://pypi.org/project/django-dbsc/)
 [![Python versions](https://img.shields.io/pypi/pyversions/django-dbsc)](https://pypi.org/project/django-dbsc/)
-[![Django versions](https://img.shields.io/pypi/djversions/django-dbsc)](https://pypi.org/project/django-dbsc/)
+[![Django versions](https://img.shields.io/pypi/frameworkversions/django/django-dbsc)](https://pypi.org/project/django-dbsc/)
 [![License: MIT](https://img.shields.io/pypi/l/django-dbsc)](https://github.com/fretscha/django-dbsc/blob/main/LICENSE)
 
 **Stolen session cookies stop working.** django-dbsc adds [Device Bound Session Credentials
